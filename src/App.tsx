@@ -5,6 +5,7 @@ import { Tip } from "./components/Tip"
 import { Letter } from "./components/Letter"
 import { Input } from "./components/Input"
 import { Button } from "./components/Button"
+import { LettersUsed } from "./components/LettersUsed"
 
 export function App() {
   
@@ -31,6 +32,8 @@ export function App() {
           <Input maxLength={1} placeholder="?"/>
           <Button title="Confirmar"/>
         </div>
+
+        <LettersUsed />
       </main>
     </div>
   )
