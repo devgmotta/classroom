@@ -12,12 +12,17 @@ import { LettersUsed, LetterUsedProps } from "./components/LettersUsed"
 export function App() {
   const [ score, setScore] = useState(0)
   const [ letter, setLetter ] = useState("")
-  const [ attempts, setAttempts ] = useState(0)
   const [ lettersUsed, setLettersUsed ] = useState<LetterUsedProps[]>([])
   const [ challenge, setChallenge ] = useState<Challenge | null>(null)
+  
+  const ATTEMPTS_MARGIN = 3
 
   function handleRestartGame(){
-    alert("Reiniciar o Jogo!")
+    const isConfirmed = window.confirm("Are you sure?")
+
+    if (isConfirmed) {
+      startGame()
+    }
   }
 
   function startGame(){
@@ -26,13 +31,37 @@ export function App() {
 
     setChallenge(randomWord)
 
-    setAttempts(0)
+    setScore(0)
     setLetter("")
+    setLettersUsed([])
+  }
+
+  function endGame(message: string){
+    alert(message)
+    startGame()
   }
 
   useEffect(() => {
     startGame()
   }, [])
+
+  useEffect(() => {
+    if(!challenge){
+      return
+    }
+
+    setTimeout(() => {
+      if(score === challenge.word.length){
+        return endGame("Boa soldado!")
+      }
+
+      const attemptLimit = challenge.word.length + ATTEMPTS_MARGIN
+
+      if(lettersUsed.length === attemptLimit){
+        return endGame("Tentativas esgotadas, pague 10!")
+      }
+    }, 200)
+  }, [score, lettersUsed.length])
 
   function handleConfirm(){
     if(!challenge) {
@@ -47,7 +76,8 @@ export function App() {
     const exists = lettersUsed.find((used) => used.value.toUpperCase() === value)
    
     if(exists){
-      return(  
+      setLetter("")
+      return (  
       alert(`Letra já utilizada! "${value}"`)
     )
     }
@@ -70,14 +100,19 @@ export function App() {
   return (
     <div className={styles.container}>
       <main>
-        <Header current={attempts} max={10} onRestart={handleRestartGame}/>
+        <Header current={lettersUsed.length} max={challenge.word.length + ATTEMPTS_MARGIN} onRestart={handleRestartGame}/>
         <Tip tip={challenge.tip}/>
         <div className={styles.word}>
-          {
-            challenge.word.split("").map(() => (
-              <Letter value=""/>
-            ))
-          }        
+          {challenge.word.split("").map((letter, index) => { 
+              const letterUsed = lettersUsed.find((used) => 
+                used.value.toUpperCase() === letter.toLocaleUpperCase())
+              return( 
+              <Letter 
+              key={index} 
+              value={letterUsed?.value}
+              color={letterUsed?.correct ? "correct" : "default"}
+              />
+            )})}                 
         </div>
 
         <h4>Palpite</h4>
